@@ -1,0 +1,108 @@
+blueprint:
+  name: icasa PULSE 4S keypad (ZHA)
+  description: 'Control anything using icasa Pulse 4S keypad'
+  domain: automation
+
+  input:
+    icasa_remote:
+      name: Keypad
+      description: Keypad to use
+      selector:
+        device:
+          integration: zha
+          manufacturer: icasa
+          model: ICZB-KPD14S
+    button_on:
+      name: On Button (short pressed)
+      description: Action to run on short press on On button
+      default: []
+      selector:
+        action: {}
+    button_on_long:
+      name: On Button (long pressed)
+      description: Action to run on press on On button
+      default: []
+      selector:
+        action: {}
+    button_off:
+      name: Off Button (short pressed)
+      description: Action to run on short press on Off button
+      default: []
+      selector:
+        action: {}
+    button_off_long:
+      name: Off Button (long pressed)
+      description: Action to run on press on Off button
+      default: []
+      selector:
+        action: {}
+    button_1:
+      name: Button S1 (short pressed)
+      description: Action to run on short press on Button S1
+      default: []
+      selector:
+        action: {}
+    button_1_long:
+      name: Button S1 (long pressed)
+      description: Action to run on long press on Button S1
+      default: []
+      selector:
+        action: {}
+    button_2:
+      name: Button S2 (short pressed)
+      description: Action to run on short press on Button S2
+      default: []
+      selector:
+        action: {}
+    button_2_long:
+      name: Button S2 (long pressed)
+      description: Action to run on long press on Button S2
+      default: []
+      selector:
+        action: {}
+
+
+mode: restart
+max_exceeded: silent
+
+trigger:
+- platform: event
+  event_type: zha_event
+  event_data:
+    device_id: !input icasa_remote
+    
+action:
+- choose:
+  - conditions:
+    - condition: template
+      value_template: '{%if trigger.event.data.command == "off"%}true{%else%}false{%endif%}'
+    sequence: !input 'button_off'
+  - conditions:
+    - condition: template
+      value_template: '{%if trigger.event.data.command == "move_with_on_off" and trigger.event.data.args == [1,50]%}true{%else%}false{%endif%}'
+    sequence: !input 'button_off_long'
+  - conditions:
+    - condition: template
+      value_template: '{%if trigger.event.data.command == "on"%}true{%else%}false{%endif%}'
+    sequence: !input 'button_on'
+  - conditions:
+    - condition: template
+      value_template: '{%if trigger.event.data.command == "move_with_on_off" and trigger.event.data.args == [0,50]%}true{%else%}false{%endif%}'
+    sequence: !input 'button_on_long'
+  - conditions:
+    - condition: template
+      value_template: '{%if trigger.event.data.command == "recall" and trigger.event.data.args == [0,1]%}true{%else%}false{%endif%}'
+    sequence: !input 'button_1'
+  - conditions:
+    - condition: template
+      value_template: '{%if trigger.event.data.command == "store" and trigger.event.data.args == [0,1]%}true{%else%}false{%endif%}'
+    sequence: !input 'button_1_long'
+  - conditions:
+    - condition: template
+      value_template: '{%if trigger.event.data.command == "recall" and trigger.event.data.args == [0,2]%}true{%else%}false{%endif%}'
+    sequence: !input 'button_2'
+  - conditions:
+    - condition: template
+      value_template: '{%if trigger.event.data.command == "store" and trigger.event.data.args == [0,2]%}true{%else%}false{%endif%}'
+    sequence: !input 'button_2_long'
+
